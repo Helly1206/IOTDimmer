@@ -14,6 +14,7 @@
 portMUX_TYPE CTriac::stateMux = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE CTriac::movAvMux = portMUX_INITIALIZER_UNLOCKED;
 volatile CTriac::triacdata CTriac::triacData = {CTriac::idle, 0, 0, 0, {0}, 0,0, false};
+volatile unsigned long CTriac::zeroSample = 0;
 
 CTriac::CTriac() { // constructor
   pinMode(ZEROCROSS_PIN, INPUT);
@@ -253,7 +254,7 @@ void CTriac::ClearMovAvFilter() {
 }
 
 void IRAM_ATTR CTriac::isr_ext() {
-  unsigned long zeroSample = micros() - triacData.zeroStamp;
+  zeroSample = micros() - triacData.zeroStamp;
   if (zeroSample >= ZERO_MIN) {
     triacData.zeroStamp += zeroSample;
     if (zeroSample <= ZERO_MAX) {

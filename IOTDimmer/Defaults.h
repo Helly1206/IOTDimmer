@@ -45,5 +45,7 @@
 #define DEF_MQTTQOS             1
 #define DEF_MQTTRETAIN          false
 #define DEF_USEMQTT             true
+#define DEF_HADISCO             false
+#define DEF_HATOPIC             "homeassistant"
 
 #endif

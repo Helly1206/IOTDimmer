@@ -40,7 +40,7 @@ void cSettings::init() {
   int i;
   byte b;
   String data = "";
-  for (i=0; i<UseMqtt->start + UseMqtt->size; i++) {
+  for (i=0; i<haTopic->start + haTopic->size; i++) {
     EEPROM.get(i, b);
     data += String(b, HEX) + "-";
   }
@@ -48,7 +48,7 @@ void cSettings::init() {
 #endif
 #ifdef FORCE_DEFAULTS
   logger.printf("Settings: Forcing default settings");
-  resetSettings(WaveMode->start, (UseMqtt->start + UseMqtt->size) - WaveMode->start);
+  resetSettings(WaveMode->start, (haTopic->start + haTopic->size) - WaveMode->start);
 #endif
   
   if (IsEmpty(WaveMode->start, (TriacMode->start + TriacMode->size) - WaveMode->start)) {
@@ -59,10 +59,14 @@ void cSettings::init() {
     logger.printf("Settings: No wifi settings, loading default");
     defaultWifiParameters();
   }
-  if (IsEmpty(brokerAddress->start, (UseMqtt->start + UseMqtt->size) - brokerAddress->start)) {
+  if (IsEmpty(brokerAddress->start, (haTopic->start + haTopic->size) - brokerAddress->start)) {
     logger.printf("Settings: No mqtt settings, loading default");
     defaultMqttParameters();
   }
+  if (IsEmpty(haTopic->start, haTopic->size)) {
+    defaultHaParameters(true);
+  }
+
 #ifdef DO_ENCRYPT
   Item *oldItem = new Item(DT_STRING, ssid->start, ssid->size);
   String value;
@@ -324,6 +328,10 @@ void cSettings::initParameters() {
   startAddress += getSize(DT_BYTE);
   UseMqtt = new Item(DT_BYTE, startAddress);               // [bool]
   startAddress += getSize(DT_BYTE);
+  haDisco = new Item(DT_BYTE, startAddress);               // [bool]
+  startAddress += getSize(DT_BYTE);
+  haTopic = new Item(DT_STRING, startAddress, STANDARD_SIZE);
+  startAddress += PASSWORD_SIZE;
 
   memsize = startAddress;
 }
@@ -351,51 +359,62 @@ boolean cSettings::IsEmpty(unsigned short start, unsigned short size) {
 }
 
 void cSettings::defaultDimmerParameters() {
-    unsigned short val = 0;
-    float fval = 0;
-    byte bval = true;
-    set(WaveMode, bval = DEF_MODE);
-    set(WaveMode100Percent, val = DEF_MODE100);
-    set(WaveEffect, bval = DEF_EFFECT);
-    set(WaveEffectMagnitude, bval = DEF_EFFECT_MAG);
-    set(WaveEffectGain, fval = DEF_EFFECT_GAIN);
-    set(WaveEffectTime, val = DEF_EFFECT_TIME);
-    set(TriacMode, bval = DEF_TRIAC_MODE);
-    set(LevelOff, bval = DEF_LEVEL_OFF);
-    set(LevelOn, bval = DEF_LEVEL_ON);
-    set(LevelLounge, bval = DEF_LEVEL_LOUNGE);
-    update();
+  unsigned short val = 0;
+  float fval = 0;
+  byte bval = true;
+  set(WaveMode, bval = DEF_MODE);
+  set(WaveMode100Percent, val = DEF_MODE100);
+  set(WaveEffect, bval = DEF_EFFECT);
+  set(WaveEffectMagnitude, bval = DEF_EFFECT_MAG);
+  set(WaveEffectGain, fval = DEF_EFFECT_GAIN);
+  set(WaveEffectTime, val = DEF_EFFECT_TIME);
+  set(TriacMode, bval = DEF_TRIAC_MODE);
+  set(LevelOff, bval = DEF_LEVEL_OFF);
+  set(LevelOn, bval = DEF_LEVEL_ON);
+  set(LevelLounge, bval = DEF_LEVEL_LOUNGE);
+  update();
 }
 
 void cSettings::defaultWifiParameters() {
-    unsigned short val = 0;
-    String sval = "";
-    byte bval = true;
-    set(ssid, sval = DEF_SSID);
-    set(password, sval = DEF_PASSWORD);
-    set(hostname, sval = DEF_HOSTNAME);
-    set(NtpServer, sval = DEF_NTPSERVER);
-    set(NtpZone, bval = DEF_NTPZONE);
-    set(UseDST, bval = DEF_USEDST);
-    set(UdpPort, val = DEF_LOGPORT);
-    set(UdpEnabled, bval = DEF_LOGENABLE);
-    set(UpdDebugLevel, val = DEF_LOGDEBUG);  
-    update();
+  unsigned short val = 0;
+  String sval = "";
+  byte bval = true;
+  set(ssid, sval = DEF_SSID);
+  set(password, sval = DEF_PASSWORD);
+  set(hostname, sval = DEF_HOSTNAME);
+  set(NtpServer, sval = DEF_NTPSERVER);
+  set(NtpZone, bval = DEF_NTPZONE);
+  set(UseDST, bval = DEF_USEDST);
+  set(UdpPort, val = DEF_LOGPORT);
+  set(UdpEnabled, bval = DEF_LOGENABLE);
+  set(UpdDebugLevel, val = DEF_LOGDEBUG);  
+  update();
 }
 
 void cSettings::defaultMqttParameters() {
-    String sval = "";
-    byte bval = true;
-    unsigned short val = 0;
-    set(brokerAddress, sval = DEF_BROKERADDRESS);
-    set(mqttPort, val = DEF_MQTTPORT);
-    set(mqttUsername, sval = DEF_MQTTUSERNAME);
-    set(mqttPassword, sval = DEF_MQTTPASSWORD);
-    set(mainTopic, sval = DEF_MAINTOPIC);
-    set(mqttQos, bval = DEF_MQTTQOS);
-    set(mqttRetain, bval = DEF_MQTTRETAIN);
-    set(UseMqtt, bval = DEF_USEMQTT);
+  String sval = "";
+  byte bval = true;
+  unsigned short val = 0;
+  set(brokerAddress, sval = DEF_BROKERADDRESS);
+  set(mqttPort, val = DEF_MQTTPORT);
+  set(mqttUsername, sval = DEF_MQTTUSERNAME);
+  set(mqttPassword, sval = DEF_MQTTPASSWORD);
+  set(mainTopic, sval = DEF_MAINTOPIC);
+  set(mqttQos, bval = DEF_MQTTQOS);
+  set(mqttRetain, bval = DEF_MQTTRETAIN);
+  set(UseMqtt, bval = DEF_USEMQTT);
+  defaultHaParameters(false);
+  update();
+}
+
+void cSettings::defaultHaParameters(bool doUpdate) {
+  String sval = "";
+  byte bval = true;
+  set(haDisco, bval = DEF_HADISCO);
+  set(haTopic, sval = DEF_HATOPIC);
+  if (doUpdate) {
     update();
+  }
 }
 
 void cSettings::aesDecrypt(char *input, char *output, int dataLength) {

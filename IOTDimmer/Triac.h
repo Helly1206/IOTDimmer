@@ -88,6 +88,7 @@ private:
   static portMUX_TYPE movAvMux;
   static portMUX_TYPE stateMux;
   volatile static triacdata triacData;
+  volatile static unsigned long zeroSample;
   static void IRAM_ATTR isr_ext();
   static void IRAM_ATTR isr_timer();
 };

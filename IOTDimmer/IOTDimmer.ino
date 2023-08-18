@@ -7,16 +7,7 @@
  * Copyright: Ivo Helwegen
  */
 
-
-// TBD:
-// TBD: remove DEBUG_UDP --. Done
-// TBD: Update udplogger --> Done
-// TBD: remove unwnated header files -->Done
-// TBD: make log categories --> Done
-// TBD: update log categories everywhere --> Done except triac, waveform, standard command
-// TBD: compare with lbind mqtt, web, LED, etc. --> Done
-
-#define APPVERSION       "v1.0.0"
+#define APPVERSION       "v1.1.0"
 
 #define BUTTON_PIN       37 // GPIO37 //interrupt
 #define FLASH_PIN         0 // GPIO0

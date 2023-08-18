@@ -30,6 +30,13 @@ typedef struct {
   unsigned long updateCounter;
 } valueMem;
 
+typedef struct { 
+  String name;
+  String id;
+  String cla;
+  String type;
+} hatopic;
+
 const char dim_status[] = "dim_status";
 const char freq_status[] = "freq_status";
 const char mode_status[] = "mode_status";
@@ -63,6 +70,8 @@ const char dim_mode_cmt[] = "subscribe: set dimmer mode [0..3]";
 const char dim_effect_cmt[] = "subscribe: set dimmer effect [0..4]";
 const char dim_input_cmt[] = "subscribe: set dimmer input effect signal [integer]";
 
+//const String dim_modes[] = {"Instant", "Linear", "Sine", "Qsine"};
+
 const topics SubscribeTopics[] {
   {dim_offon, dim_offon_cmt},
   {dim_off, dim_off_cmt},
@@ -74,28 +83,49 @@ const topics SubscribeTopics[] {
   {dim_input, dim_input_cmt}
 };
 
+const char dev_mf[] = "IOTControl";
+const char dev_mdl[] = "IOTDimmer";
+const char ha_config[] = "config";
+const char ha_status[] = "status";
+const char ha_online[] = "online";
+const char ha_offline[] = "offline";
+
+const hatopic ha_light  {"Light",     "light",  "",          "light"}; // name, id, cla, type
+const hatopic ha_off    {"Off",       "off",    "",          "button"}; // name, id, cla, type
+const hatopic ha_on     {"On",        "on",     "",          "button"}; // name, id, cla, type
+const hatopic ha_lounge {"Lounge",    "lounge", "",          "button"}; // name, id, cla, type
+const hatopic ha_freq   {"Frequency", "freq",   "frequency", "sensor"}; // name, id, cla, type
+
 class cMqtt {
   public:
     cMqtt(); // constructor
     void init();
     void handle();
+    void update();
     String fixTopic(String topic);
     String getValue(String tag);
     String buildTopic(String tag);
     String clientId;
     boolean connected;
   private:
+    enum hastatus {unknown = 0, 
+                   online  = 1, 
+                   offline = 2};
     static void callback(char* topic, byte* payload, unsigned int length);
     void sendStatus();
-    boolean reconnect();
+    void reconnect();
+    void homeAssistantDiscovery();
     static String getTag(String topic);
+    static String getMain(String topic);
     static String bp2string(byte *payload, unsigned int length);
     static boolean getBoolean(String payload);
     static byte getPercentage(String payload);
     static byte getByte(String payload);
     static int getInt(String payload);
+    String joinTopic(String topic, String tag);
+    String us(String tag);
     valueMem *publishMem;
-    boolean connecting;
+    boolean reconnect_wait;
     static void timerCallback(TimerHandle_t xTimer);
     TimerHandle_t conTimer;
     StaticTimer_t conTimerBuffer;
@@ -103,6 +133,8 @@ class cMqtt {
     TimerHandle_t pubTimer;
     StaticTimer_t pubTimerBuffer;
     static boolean doPub;
+    static hastatus statusHa;
+    static boolean discoUpdate;
 };
 
 extern cMqtt mqtt;

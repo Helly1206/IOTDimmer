@@ -1,4 +1,4 @@
-IOTDimmer v1.0.0
+IOTDimmer v1.1.0
 
 IOTDimmer - Smarthome controller for dimmer lights
 ========= = ========= ========== === ====== ======
@@ -31,6 +31,7 @@ Functions:
 - Ability to use power or timed mode for dimmer percentage.          
 - Use of modes to smoothly switch on/ off lights.
 - Use of effects to alter light level and even use it as a ligth organ.
+- MQTT auto discovery for home asistant if enabled.
 
 Installation:
 -------------

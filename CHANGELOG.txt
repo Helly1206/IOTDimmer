@@ -1,2 +1,6 @@
+[B]1.1.0[/B]
+- Fixed MQTT not reconnecting after disconnecting from broker.
+- Added MQTT auto discovery for home assistant.
+
 [B]1.0.0[/B]
 - First working release.
