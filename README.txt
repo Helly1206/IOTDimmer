@@ -1,4 +1,4 @@
-IOTDimmer v1.1.0
+IOTDimmer v1.1.1
 
 IOTDimmer - Smarthome controller for dimmer lights
 ========= = ========= ========== === ====== ======

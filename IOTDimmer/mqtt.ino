@@ -214,6 +214,7 @@ void cMqtt::reconnect() {
   
   if (connAttempt) {
     logger.printf(LOG_MQTT, "MQTT connected");
+    logger.printf(logger.l13, "MQTT connected");
     if ((boolean)settings.getByte(settings.haDisco)) {
       String hatopic = settings.getString(settings.haTopic) + "/" + ha_status;
       client.subscribe(hatopic.c_str(), (int)settings.getByte(settings.mqttQos));
@@ -233,6 +234,7 @@ void cMqtt::reconnect() {
     update();
   } else {
     logger.printf(LOG_MQTT, "MQTT connection failed, rc=" + String(client.state()) + " try again in" + String(MQTT_RECONNECT_TIME/1000) + "seconds");
+    logger.printf(logger.l13, "MQTT connection failed, rc=" + String(client.state()) + " try again in" + String(MQTT_RECONNECT_TIME/1000) + "seconds");
   }
   return;
 }
@@ -250,7 +252,7 @@ void cMqtt::homeAssistantDiscovery() {
   jDeviceString.AddItem("name", devName);
   jDeviceString.AddItem("mf", String(dev_mf));
   jDeviceString.AddItem("mdl", String(dev_mdl));
-  logger.printf(jDeviceString.GetJson());
+  //logger.printf(jDeviceString.GetJson());
 
   jString.Clear();
 
@@ -264,7 +266,7 @@ void cMqtt::homeAssistantDiscovery() {
   jString.AddItem("on_cmd_type", "brightness");
   jString.AddItem("uniq_id", arraystr[1] + us(ha_light.id));
   jString.AddItem("dev", jDeviceString);
-  logger.printf(jString.GetJson());
+  //logger.printf(jString.GetJson());
 
   topic = joinTopic(joinTopic(joinTopic(settings.getString(settings.haTopic), ha_light.type), devName + us(ha_light.id)), ha_config);
   client.publish(topic.c_str(), jString.GetJson().c_str(), true);
@@ -277,7 +279,7 @@ void cMqtt::homeAssistantDiscovery() {
   jString.AddItem("pl_prs", "1");
   jString.AddItem("uniq_id", arraystr[1] + us(ha_off.id));
   jString.AddItem("dev", jDeviceString);
-  logger.printf(jString.GetJson());
+  //logger.printf(jString.GetJson());
 
   topic = joinTopic(joinTopic(joinTopic(settings.getString(settings.haTopic), ha_off.type), devName + us(ha_off.id)), ha_config);
   client.publish(topic.c_str(), jString.GetJson().c_str(), true);
@@ -290,7 +292,7 @@ void cMqtt::homeAssistantDiscovery() {
   jString.AddItem("pl_prs", "1");
   jString.AddItem("uniq_id", arraystr[1] + us(ha_on.id));
   jString.AddItem("dev", jDeviceString);
-  logger.printf(jString.GetJson());
+  //logger.printf(jString.GetJson());
 
   topic = joinTopic(joinTopic(joinTopic(settings.getString(settings.haTopic), ha_on.type), devName + us(ha_on.id)), ha_config);
   client.publish(topic.c_str(), jString.GetJson().c_str(), true);
@@ -303,7 +305,7 @@ void cMqtt::homeAssistantDiscovery() {
   jString.AddItem("pl_prs", "1");
   jString.AddItem("uniq_id", arraystr[1] + us(ha_lounge.id));
   jString.AddItem("dev", jDeviceString);
-  logger.printf(jString.GetJson());
+  //logger.printf(jString.GetJson());
 
   topic = joinTopic(joinTopic(joinTopic(settings.getString(settings.haTopic), ha_lounge.type), devName + us(ha_lounge.id)), ha_config);
   client.publish(topic.c_str(), jString.GetJson().c_str(), true);
