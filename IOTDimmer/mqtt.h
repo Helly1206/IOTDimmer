@@ -37,16 +37,19 @@ typedef struct {
   String type;
 } hatopic;
 
+const char light_status[] = "light_status";
 const char dim_status[] = "dim_status";
 const char freq_status[] = "freq_status";
 const char mode_status[] = "mode_status";
 const char effect_status[] = "effect_status";
+const char light_status_cmt[] = "publish: current stauts of the ligth [0=off, 1=on]";
 const char dim_status_cmt[] = "publish: current power of the dimmer [%]";
 const char freq_status_cmt[] = "publish: current line frequency [Hz]";
 const char mode_status_cmt[] = "publish: current mode status [0=inst, 1=lin, 2=sin, 3=qsin]";
 const char effect_status_cmt[] = "publish: current effect status [0=none, 1=ramp, 2=sin, 3=rnd, 4=inp]";
 
 const topics PublishTopics[] {
+  {light_status, light_status_cmt},
   {dim_status, dim_status_cmt},
   {freq_status, freq_status_cmt},
   {mode_status, mode_status_cmt},
@@ -113,6 +116,7 @@ class cMqtt {
                    offline = 2};
     static void callback(char* topic, byte* payload, unsigned int length);
     void sendStatus();
+    void isConnected();
     void reconnect();
     void homeAssistantDiscovery();
     static String getTag(String topic);

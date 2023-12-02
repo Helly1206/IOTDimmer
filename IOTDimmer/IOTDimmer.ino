@@ -7,7 +7,7 @@
  * Copyright: Ivo Helwegen
  */
 
-#define APPVERSION       "v1.1.1"
+#define APPVERSION       "v1.1.2"
 
 #define BUTTON_PIN       37 // GPIO37 //interrupt
 #define FLASH_PIN         0 // GPIO0

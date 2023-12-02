@@ -55,7 +55,7 @@ void CButton::handleButton() {
         logger.printf(LOG_BUTTON, "Button mode step");
         waveform.setPower(nextStep());
       } else { // handle on/off mode
-        if (waveform.getPower() > settings.getByte(settings.LevelOff)) { // = on, switch off
+        if (waveform.getStatus()) { // = on, switch off
           logger.printf(LOG_BUTTON, "Button off");
           waveform.setPower(settings.getByte(settings.LevelOff));
         } else { //= off, switch on

@@ -79,6 +79,10 @@ byte CWaveform::getMode() {
   return (byte)mode;
 }
 
+boolean CWaveform::getStatus() {
+  return getPower() > settings.getByte(settings.LevelOff);
+}
+
 CWaveform::waveformmode CWaveform::getModeEnum() {
   return mode;
 }

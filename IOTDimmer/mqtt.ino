@@ -48,7 +48,7 @@ void cMqtt::init() {
 
 void cMqtt::handle() {
   if ((iotWifi.connected) && ((boolean)settings.getByte(settings.UseMqtt))) {
-    connected = client.connected();
+    isConnected();
     if (!connected) {
       if (!reconnect_wait) {
         xTimerStart(conTimer, portMAX_DELAY);
@@ -93,7 +93,9 @@ String cMqtt::fixTopic(String topic) {
 
 String cMqtt::getValue(String tag) {
   String value = "";
-  if (tag == dim_status) {
+  if (tag == light_status) {
+    value = String(waveform.getStatus());
+  } else if (tag == dim_status) {
     value = String(waveform.getPower());
   } else if (tag == freq_status) {
     value = String(triac.getFreq());
@@ -182,7 +184,7 @@ void cMqtt::sendStatus() { // publish on connected or (every ten minutes or) whe
     int publishLen = (sizeof(PublishTopics) / sizeof(topics));
     for (int i = 0; i < publishLen; i++) {
       String val = getValue(PublishTopics[i].tag);
-      if (PublishTopics[i].tag == dim_status) {
+      if ((PublishTopics[i].tag == dim_status) || (PublishTopics[i].tag == light_status)) {
         if (val != publishMem[i].value) {
           client.publish(buildTopic(PublishTopics[i].tag).c_str(), val.c_str(), (boolean)settings.getByte(settings.mqttRetain));
           publishMem[i].value = val;
@@ -202,17 +204,30 @@ void cMqtt::sendStatus() { // publish on connected or (every ten minutes or) whe
   }
 }
 
+void cMqtt::isConnected() {
+  if (connected) {
+    connected = client.connected();
+    if (!connected) {
+      logger.printf(LOG_MQTT, "MQTT disconnected, state=" + String(client.state()));
+      logger.printf(logger.l13, "MQTT disconnected, state=" + String(client.state()));
+      client.disconnect();
+    }
+  }
+}
+
 void cMqtt::reconnect() {
-  boolean connAttempt = false;
+  int state = 0;
   String username = settings.getString(settings.mqttUsername);
   String password = settings.getString(settings.mqttPassword);
   if (username.length() > 0) {
-    connAttempt = client.connect(clientId.c_str(), username.c_str(), password.c_str());
+    client.connect(clientId.c_str(), username.c_str(), password.c_str());
   } else {
-    connAttempt = client.connect(clientId.c_str());
-  }  
+    client.connect(clientId.c_str());
+  } // don't use connect return value, as it returns old connection status.
+  state = client.state();
+  connected = client.connected();  
   
-  if (connAttempt) {
+  if (connected) {
     logger.printf(LOG_MQTT, "MQTT connected");
     logger.printf(logger.l13, "MQTT connected");
     if ((boolean)settings.getByte(settings.haDisco)) {
@@ -233,8 +248,8 @@ void cMqtt::reconnect() {
     }
     update();
   } else {
-    logger.printf(LOG_MQTT, "MQTT connection failed, rc=" + String(client.state()) + " try again in" + String(MQTT_RECONNECT_TIME/1000) + "seconds");
-    logger.printf(logger.l13, "MQTT connection failed, rc=" + String(client.state()) + " try again in" + String(MQTT_RECONNECT_TIME/1000) + "seconds");
+    logger.printf(LOG_MQTT, "MQTT connection failed, state=" + String(state) + " try again in " + String(MQTT_RECONNECT_TIME/1000) + " seconds");
+    logger.printf(logger.l13, "MQTT connection failed, state=" + String(state) + " try again in " + String(MQTT_RECONNECT_TIME/1000) + " seconds");
   }
   return;
 }
@@ -259,7 +274,9 @@ void cMqtt::homeAssistantDiscovery() {
   jString.AddItem("name", ha_light.name);
   jString.AddItem("~", settings.getString(settings.mainTopic));
   jString.AddItem("cmd_t", "~/offon");
+  jString.AddItem("stat_t", "~/light_status");
   jString.AddItem("pl_off", "0");
+  jString.AddItem("pl_on", "1");
   jString.AddItem("bri_cmd_t", "~/dim");
   jString.AddItem("bri_stat_t", "~/dim_status"); 
   jString.AddItem("bri_scl", "100"); 

@@ -170,7 +170,7 @@ void Cled::WifiC() {
 void Cled::Command() {
   logger.printf(LOG_LED, "Command");
   if (!button.stepping()) {
-    if (waveform.getPower() > settings.getByte(settings.LevelOff)) { // = on
+    if (waveform.getStatus()) { // = on
       On();
     } else {
       Off();

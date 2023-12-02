@@ -30,6 +30,7 @@ public:
   int getInput();
   void setMode(byte imode);
   byte getMode();
+  boolean getStatus();
   waveformmode getModeEnum();
   
   void setEffect(byte ieffect);
